@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 interface UserProfile {
     name: string;
@@ -82,8 +83,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     // This prevents saving default "0" state over persisted data during mount
     const [isLoaded, setIsLoaded] = useState(false);
 
+    const { data: session, status } = useSession();
+
     // Load User Data (Sync with DB)
     useEffect(() => {
+        if (status !== "authenticated") return;
+
         const loadData = async () => {
             try {
                 // First try loading from local storage for instant render
@@ -107,7 +112,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
             }
         };
         loadData();
-    }, []);
+    }, [status]);
 
     // Sync to Server on Change (Debounced)
     useEffect(() => {
@@ -115,6 +120,9 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
         // Save to local immediately
         localStorage.setItem("dashboardCharts", JSON.stringify(savedCharts));
+
+        // Only sync to server if logged in
+        if (status !== "authenticated") return;
 
         const syncToServer = setTimeout(async () => {
             try {
@@ -136,7 +144,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }, 2000); // Debounce 2s
 
         return () => clearTimeout(syncToServer);
-    }, [savedCharts, recentActivity, stats.totalReports, stats.dataPointsProcessed, isLoaded]);
+    }, [savedCharts, recentActivity, stats.totalReports, stats.dataPointsProcessed, isLoaded, status]);
 
     // Simulate real-time updates
     useEffect(() => {
