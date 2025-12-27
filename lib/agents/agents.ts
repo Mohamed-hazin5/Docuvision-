@@ -8,7 +8,7 @@ import { getKeyManager } from "@/lib/multi-key-manager";
 const getModel = (temperature: number = 0.7) => {
   const keyManager = getKeyManager();
   return new ChatGoogleGenerativeAI({
-    model: "gemini-pro", // Using stable model name for v1beta API
+    model: "gemini-2.5-flash",
     maxOutputTokens: 8192,
     apiKey: keyManager.getNextKey(),
     temperature,

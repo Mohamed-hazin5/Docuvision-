@@ -5,7 +5,7 @@ async function callGeminiChat(prompt: string, apiKey: string, retries: number = 
     for (let attempt = 0; attempt <= retries; attempt++) {
         try {
             const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
                 {
                     method: 'POST',
                     headers: {

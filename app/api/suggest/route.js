@@ -10,7 +10,8 @@ export async function POST(req) {
     const genAI = new GoogleGenerativeAI(apiKey);
 
     // Use model names that exist on the REST ListModels response. Allow override with GEMINI_MODEL_LIST.
-    const candidateModels = (process.env.GEMINI_MODEL_LIST || "gemini-pro-latest,gemini-2.5-pro,gemini-2.5-flash,gemini-flash-latest,gemma-3-1b-it").split(",").map((s) => s.trim()).filter(Boolean);
+    // Use verified available models
+    const candidateModels = (process.env.GEMINI_MODEL_LIST || "gemini-2.5-flash,gemini-2.5-pro,gemini-2.0-flash,gemini-2.0-flash-exp,gemini-flash-latest,gemini-pro-latest,gemma-3-1b-it").split(",").map((s) => s.trim()).filter(Boolean);
 
     const prompt = `
       You are a data visualization expert.

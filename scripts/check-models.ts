@@ -31,13 +31,11 @@ async function main() {
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const candidates = [
+        "gemini-2.0-flash-exp",
+        "gemini-2.0-flash",
         "gemini-1.5-flash",
         "gemini-1.5-pro",
-        "gemini-pro",
-        "gemini-1.0-pro",
-        "gemini-pro-vision",
-        "gemini-flash-latest",
-        "gemini-pro-latest"
+        "gemini-pro"
     ];
 
     for (const modelName of candidates) {
@@ -48,8 +46,7 @@ async function main() {
             console.log("SUCCESS ✅");
             return; // Found one!
         } catch (error: any) {
-            console.log("FAILED ❌");
-            // console.log(error.message); // Uncommon to show full error to avoid noise
+            console.log("FAILED ❌", error.message);
         }
     }
     console.log("All candidates failed.");
