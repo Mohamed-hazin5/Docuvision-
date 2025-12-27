@@ -11,21 +11,37 @@ export default function LoginPage() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Attempting login for:", username);
-        const res = await signIn("credentials", {
-            username,
-            password,
-            redirect: false,
-        });
+        setError("");
+        setLoading(true);
 
-        if (res?.error) {
-            setError("Invalid credentials");
-        } else {
-            router.push("/dashboard");
+        console.log("Attempting login for:", username);
+
+        try {
+            const res = await signIn("credentials", {
+                username,
+                password,
+                redirect: false,
+            });
+
+            console.log("Login response:", res);
+
+            if (res?.error) {
+                setError(res.error === "CredentialsSignin" ? "Invalid email or password" : res.error);
+                setLoading(false);
+            } else if (res?.ok) {
+                console.log("Login success, redirecting...");
+                router.push("/dashboard");
+                router.refresh();
+            }
+        } catch (err) {
+            console.error("Login crash:", err);
+            setError("An unexpected error occurred");
+            setLoading(false);
         }
     };
 
@@ -67,9 +83,16 @@ export default function LoginPage() {
                     </div>
 
                     <div className="pt-2">
-                        <MagneticButton className="w-full justify-center bg-indigo-600 hover:bg-indigo-700 py-4">
-                            Sign In
-                        </MagneticButton>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`w-full justify-center py-4 text-white font-semibold rounded-xl transition-all ${loading
+                                    ? "bg-indigo-400 cursor-not-allowed"
+                                    : "bg-indigo-600 hover:bg-indigo-700 active:scale-95"
+                                }`}
+                        >
+                            {loading ? "Signing In..." : "Sign In"}
+                        </button>
                     </div>
 
                     <div className="text-center text-sm text-slate-500">

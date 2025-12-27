@@ -10,11 +10,13 @@ export default function SignupPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setLoading(true);
 
         try {
             const res = await fetch("/api/auth/register", {
@@ -27,13 +29,17 @@ export default function SignupPage() {
 
             if (!res.ok) {
                 setError(data.error || "Registration failed");
+                setLoading(false);
                 return;
             }
 
-            // Redirect to login on success
-            router.push("/login?registered=true");
+            console.log("Signup success, redirecting to login");
+            // Use window.location for a hard redirect to ensure state is clean
+            window.location.href = "/login?registered=true";
         } catch (err) {
+            console.error("Signup error:", err);
             setError("Something went wrong");
+            setLoading(false);
         }
     };
 
@@ -89,9 +95,16 @@ export default function SignupPage() {
                     </div>
 
                     <div className="pt-2">
-                        <MagneticButton className="w-full justify-center bg-indigo-600 hover:bg-indigo-700 py-4">
-                            Sign Up
-                        </MagneticButton>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className={`w-full justify-center py-4 text-white font-semibold rounded-xl transition-all ${loading
+                                    ? "bg-indigo-400 cursor-not-allowed"
+                                    : "bg-indigo-600 hover:bg-indigo-700 active:scale-95"
+                                }`}
+                        >
+                            {loading ? "Creating Account..." : "Sign Up"}
+                        </button>
                     </div>
 
                     <div className="text-center text-sm text-slate-500">
