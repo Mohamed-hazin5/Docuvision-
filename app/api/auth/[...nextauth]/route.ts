@@ -1,6 +1,9 @@
 
 import NextAuth, { type DefaultSession } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import connectToDatabase from "@/lib/db";
+import User from "@/lib/models/User";
 
 declare module "next-auth" {
     interface Session {
@@ -19,12 +22,27 @@ export const authOptions = {
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials, req) {
-                // Add logic here to look up the user from the credentials supplied
-                // For simple testing, any user with 'password' works
-                if (credentials?.username === "demo" && credentials?.password === "demo123") {
-                    return { id: "1", name: "Demo User", email: "demo@example.com" }
+                if (!credentials?.username || !credentials?.password) {
+                    return null;
                 }
-                return null
+
+                await connectToDatabase();
+
+                // Find user by email (using username field from form as email)
+                const user = await User.findOne({ email: credentials.username });
+
+                if (!user) {
+                    return null;
+                }
+
+                // Verify password
+                const isValid = await bcrypt.compare(credentials.password, user.password);
+
+                if (!isValid) {
+                    return null;
+                }
+
+                return { id: user._id.toString(), name: user.name, email: user.email };
             }
         })
     ],
