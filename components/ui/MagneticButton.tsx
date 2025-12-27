@@ -3,13 +3,16 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
+interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  children: React.ReactNode;
+  className?: string;
+}
+
 export function MagneticButton({
   children,
   className = "",
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+  ...props
+}: MagneticButtonProps) {
   const ref = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -49,6 +52,7 @@ export function MagneticButton({
   return (
     <button
       ref={ref}
+      {...props}
       className={`relative isolate overflow-hidden rounded-full px-6 py-3 text-sm font-semibold text-white shadow-lg transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${className}`}
     >
       <span className="pointer-events-none">{children}</span>
