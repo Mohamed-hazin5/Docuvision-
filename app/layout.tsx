@@ -4,6 +4,7 @@ import "./globals.css";
 import { SwupProvider } from "@/components/providers/SwupProvider";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
 import { UserProvider } from "@/components/providers/UserProvider";
+import { SessionProvider } from "@/components/providers/SessionProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,11 +34,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-white text-slate-900 antialiased`}
       >
         <UISettingsProvider>
-          <UserProvider>
-            <SwupProvider>
-              <SmoothScrollProvider>{children}</SmoothScrollProvider>
-            </SwupProvider>
-          </UserProvider>
+          <SessionProvider>
+            <UserProvider>
+              <SwupProvider>
+                <SmoothScrollProvider>{children}</SmoothScrollProvider>
+              </SwupProvider>
+            </UserProvider>
+          </SessionProvider>
         </UISettingsProvider>
       </body>
     </html>
