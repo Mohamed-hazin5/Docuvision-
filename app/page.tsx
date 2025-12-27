@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import Link from "next/link";
 import { Hero } from "@/components/sections/Hero";
 import { RevealOnScroll } from "@/components/animations/RevealOnScroll";
 import { MagneticButton } from "@/components/ui/MagneticButton";
@@ -133,9 +134,11 @@ export default function Home() {
               ))}
             </ol>
             <div className="flex flex-wrap gap-3">
-              <MagneticButton className="bg-slate-900 hover:bg-slate-800">
-                Add motion to dashboard →
-              </MagneticButton>
+              <Link href="/dashboard" className="block">
+                <MagneticButton className="bg-slate-900 hover:bg-slate-800">
+                  Add motion to dashboard →
+                </MagneticButton>
+              </Link>
               <MagneticButton className="bg-indigo-600 hover:bg-indigo-500">
                 Trigger a reveal now
               </MagneticButton>
@@ -155,7 +158,7 @@ export default function Home() {
               </p>
               <div className="rounded-2xl bg-slate-900/60 p-5 ring-1 ring-white/10 backdrop-blur">
                 <pre className="font-mono text-sm leading-6 text-indigo-100">
-{`gsap.from(".card", {
+                  {`gsap.from(".card", {
   opacity: 0,
   y: 48,
   scrollTrigger: { trigger: ".card", start: "top 80%" },
