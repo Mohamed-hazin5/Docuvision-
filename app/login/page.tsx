@@ -15,6 +15,7 @@ export default function LoginPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("Attempting login for:", username);
         const res = await signIn("credentials", {
             username,
             password,
@@ -44,13 +45,13 @@ export default function LoginPage() {
                     )}
 
                     <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700">Username</label>
+                        <label className="text-sm font-semibold text-slate-700">Email Address</label>
                         <input
-                            type="text"
+                            type="email"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-                            placeholder="demo"
+                            placeholder="alex@example.com"
                         />
                     </div>
 

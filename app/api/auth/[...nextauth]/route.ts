@@ -22,21 +22,22 @@ export const authOptions = {
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials, req) {
+                console.log("Auth attempt for:", credentials?.username);
                 if (!credentials?.username || !credentials?.password) {
                     return null;
                 }
 
                 await connectToDatabase();
 
-                // Find user by email (using username field from form as email)
                 const user = await User.findOne({ email: credentials.username });
+                console.log("User found in DB:", !!user);
 
                 if (!user) {
                     return null;
                 }
 
-                // Verify password
                 const isValid = await bcrypt.compare(credentials.password, user.password);
+                console.log("Password valid:", isValid);
 
                 if (!isValid) {
                     return null;
@@ -56,7 +57,8 @@ export const authOptions = {
             }
             return session;
         }
-    }
+    },
+    debug: process.env.NODE_ENV === 'development',
 }
 
 const handler = NextAuth(authOptions);
