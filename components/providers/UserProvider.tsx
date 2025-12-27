@@ -82,63 +82,61 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     // This prevents saving default "0" state over persisted data during mount
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Load from LocalStorage
+    // Load User Data (Sync with DB)
     useEffect(() => {
-        try {
-            const savedCharts = localStorage.getItem("dashboardCharts");
-            if (savedCharts) setSavedCharts(JSON.parse(savedCharts));
+        const loadData = async () => {
+            try {
+                // First try loading from local storage for instant render
+                const localCharts = localStorage.getItem("dashboardCharts");
+                if (localCharts) setSavedCharts(JSON.parse(localCharts));
 
-            // Load persisted stats
-            const savedStats = localStorage.getItem("dashboardStats");
-            if (savedStats && savedStats !== "undefined") {
-                const parsed = JSON.parse(savedStats);
-                if (parsed && typeof parsed === 'object') {
-                    setStats(prev => ({ ...prev, ...parsed }));
+                // Then fetch from server
+                const res = await fetch('/api/user/sync');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data) {
+                        setSavedCharts(data.savedCharts || []);
+                        setRecentActivity(data.recentActivity || []);
+                        setStats(prev => ({ ...prev, ...(data.stats || {}) }));
+                    }
                 }
+            } catch (e) {
+                console.error("Failed to load user data", e);
+            } finally {
+                setIsLoaded(true);
             }
-
-            // Load persisted activity
-            const savedActivity = localStorage.getItem("dashboardActivity");
-            if (savedActivity && savedActivity !== "undefined") {
-                const parsed = JSON.parse(savedActivity);
-                if (Array.isArray(parsed)) {
-                    setRecentActivity(parsed);
-                }
-            }
-        } catch (e) {
-            console.error("Failed to load dashboard data", e);
-        } finally {
-            setIsLoaded(true);
-        }
+        };
+        loadData();
     }, []);
 
-    // Save to LocalStorage
+    // Sync to Server on Change (Debounced)
     useEffect(() => {
         if (!isLoaded) return;
-        try {
-            localStorage.setItem("dashboardCharts", JSON.stringify(savedCharts));
-        } catch (e) {
-            console.error("Failed to save charts", e);
-        }
-    }, [savedCharts]);
 
-    useEffect(() => {
-        if (!isLoaded) return;
-        try {
-            localStorage.setItem("dashboardStats", JSON.stringify(stats));
-        } catch (e) {
-            console.error("Failed to save stats", e);
-        }
-    }, [stats]);
+        // Save to local immediately
+        localStorage.setItem("dashboardCharts", JSON.stringify(savedCharts));
 
-    useEffect(() => {
-        if (!isLoaded) return;
-        try {
-            localStorage.setItem("dashboardActivity", JSON.stringify(recentActivity));
-        } catch (e) {
-            console.error("Failed to save activity", e);
-        }
-    }, [recentActivity]);
+        const syncToServer = setTimeout(async () => {
+            try {
+                await fetch('/api/user/sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        savedCharts,
+                        recentActivity,
+                        stats: {
+                            totalReports: stats.totalReports,
+                            dataPointsProcessed: stats.dataPointsProcessed
+                        }
+                    })
+                });
+            } catch (e) {
+                console.error("Sync failed", e);
+            }
+        }, 2000); // Debounce 2s
+
+        return () => clearTimeout(syncToServer);
+    }, [savedCharts, recentActivity, stats.totalReports, stats.dataPointsProcessed, isLoaded]);
 
     // Simulate real-time updates
     useEffect(() => {
